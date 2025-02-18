@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  server:
+    container_name: server
+    build:
+      context: ../
+      dockerfile: .build/Dockerfile
+    command: /app/app
+    restart: unless-stopped
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    env_file:
+      - ../.env

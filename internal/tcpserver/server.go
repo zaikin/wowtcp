@@ -17,6 +17,13 @@ const (
 	ForceShutdownTimeout = 1 * time.Second
 )
 
+const (
+	QuoteCommand = "quote!"
+	QuitCommand  = "quit!"
+	NoncePrefix  = "nonce: "
+	QuotePrefix  = "quote: "
+)
+
 //go:generate mockery --name=Repository --output=./mocks --outpkg=mocks
 type Repository interface {
 	GetWoWQuote() string
@@ -93,11 +100,11 @@ func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
 			log.Debug().Str("received message", message).Msg("Received message")
 
 			switch message {
-			case "quit!":
+			case QuitCommand:
 				log.Info().Msg("Received quit message, closing connection")
 				conn.Close()
 				return
-			case "quote!":
+			case QuoteCommand:
 				if err = s.handleQuote(ctx, messages); err != nil {
 					log.Warn().Err(err).Msg("Error handling quote")
 					conn.Close()
@@ -114,7 +121,7 @@ func (s *Server) handleQuote(ctx context.Context, messages tcpio.ReadWriter) err
 	log := zerolog.Ctx(ctx).With().Str("method", "handleQuote").Logger()
 	chall := s.challenger.NewChallenge("quote")
 
-	_, err := messages.Write(chall.GetChallengeMessage() + "\n")
+	_, err := messages.Write(chall.GetChallengeMessage())
 	if err != nil {
 		err = errors.Wrap(err, "Error sending challenge")
 		return err
@@ -128,26 +135,26 @@ func (s *Server) handleQuote(ctx context.Context, messages tcpio.ReadWriter) err
 		return err
 	}
 
-	if !strings.HasPrefix(nonce, "nonce: ") {
+	if !strings.HasPrefix(nonce, NoncePrefix) {
 		log.Error().Err(err).Str("nonce", nonce).Msg("Error parsing nonce response")
 		err = errors.New("invalid nonce response format")
 		return err
 	}
 
-	nonce = strings.TrimPrefix(nonce, "nonce: ")
+	nonce = strings.TrimPrefix(nonce, NoncePrefix)
 
 	log.Info().Str("received nonce", nonce).Msg("Received nonce response")
 
 	if chall.VerifyPoW(nonce) {
 		quote := s.repository.GetWoWQuote()
-		if _, err = messages.Write(fmt.Sprintf("quote: %s\n", quote)); err != nil {
+		if _, err = messages.Write(QuotePrefix + quote); err != nil {
 			err = errors.Wrap(err, "Error sending quote")
 			return err
 		}
 		log.Info().Str("sent quote", quote).Msg("Sent quote to client")
 	} else {
 		errorMessage := "Invalid nonce"
-		if _, err = messages.Write(errorMessage + "\n"); err != nil {
+		if _, err = messages.Write(errorMessage); err != nil {
 			err = errors.Wrap(err, "Error sending error message")
 			return err
 		}

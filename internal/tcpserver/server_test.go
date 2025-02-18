@@ -161,10 +161,11 @@ func TestHandleQuote(t *testing.T) {
 	mockRepo := new(mocks.Repository)
 	mockRepo.On("GetWoWQuote").Return(expectedQuote)
 
-	mockChallenger := new(mocks.Challenger)
 	mockChallenge := new(challengerMocks.Challenge)
 	mockChallenge.On("GetChallengeMessage").Return(expectedChallenge)
 	mockChallenge.On("VerifyPoW", mock.Anything).Return(true)
+
+	mockChallenger := new(mocks.Challenger)
 	mockChallenger.On("NewChallenge", mock.Anything).Return(mockChallenge)
 
 	server := &Server{

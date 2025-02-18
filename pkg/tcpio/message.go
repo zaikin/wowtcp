@@ -47,7 +47,7 @@ func (t *TCPReadWriter) Read() (string, error) {
 }
 
 func (t *TCPReadWriter) Write(content string) (int, error) {
-	number, err := t.writer.WriteString(content)
+	number, err := t.writer.WriteString(content + "\n")
 	if err == nil {
 		err = t.writer.Flush()
 	}

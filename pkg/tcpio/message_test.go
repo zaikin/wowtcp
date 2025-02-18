@@ -71,7 +71,7 @@ func TestTcpReadWriter_Write(t *testing.T) {
 	}
 	rw := NewTCPReadWriter(conn)
 
-	n, err := rw.Write(message + "\n")
+	n, err := rw.Write(message)
 	require.NoError(t, err)
 	assert.Equal(t, len(message)+1, n)
 	assert.Equal(t, message+"\n", writeBuffer.String())
@@ -91,7 +91,7 @@ func TestTcpReadWriter_ReadWrite(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, message, readMessage)
 
-	n, err := rw.Write(readMessage + "\n")
+	n, err := rw.Write(readMessage)
 	require.NoError(t, err)
 	assert.Equal(t, len(readMessage)+1, n)
 	assert.Equal(t, message+"\n", writeBuffer.String())

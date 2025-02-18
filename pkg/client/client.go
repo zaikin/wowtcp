@@ -19,6 +19,14 @@ var (
 	ErrConncectionClose = errors.New("error closing connection")
 )
 
+const (
+	QuoteCommand    = "quote!"
+	QuitCommand     = "quit!"
+	NoncePrefix     = "nonce: "
+	QuotePrefix     = "quote: "
+	ChallengePrefix = "challenge: "
+)
+
 type MessageType int
 
 const (
@@ -60,7 +68,7 @@ func (c *Client) Close() {
 }
 
 func (c *Client) RequestQuote() (string, error) {
-	if _, err := c.messages.Write("quote!\n"); err != nil {
+	if _, err := c.messages.Write(QuoteCommand); err != nil {
 		err = errors.Wrap(err, ErrSendingMessage.Error())
 		return "", err
 	}
@@ -91,13 +99,13 @@ func (c *Client) RequestQuote() (string, error) {
 
 func (c *Client) handleMessage(message string) (MessageType, string, error) {
 	switch {
-	case message == "quit!":
+	case message == QuitCommand:
 		c.Close()
 		return QuitMessage, "", nil
-	case strings.HasPrefix(message, "challenge: "):
+	case strings.HasPrefix(message, ChallengePrefix):
 		return ChallengeMessage, "", c.handleChallenge(message)
-	case strings.HasPrefix(message, "quote: "):
-		return QuoteMessage, strings.TrimPrefix(message, "quote: "), nil
+	case strings.HasPrefix(message, QuotePrefix):
+		return QuoteMessage, strings.TrimPrefix(message, QuotePrefix), nil
 	default:
 	}
 	return EmptyMessage, "", nil
@@ -113,7 +121,7 @@ func (c *Client) handleChallenge(message string) error {
 
 	nonce := chall.SolvePoW()
 
-	if _, err := c.messages.Write(fmt.Sprintf("nonce: %s\n", nonce)); err != nil {
+	if _, err := c.messages.Write(NoncePrefix + nonce); err != nil {
 		err = errors.Wrap(err, "error on sending nonce")
 		err = errors.Wrap(err, ErrSendingMessage.Error())
 		return err

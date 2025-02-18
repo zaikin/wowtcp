@@ -7,14 +7,16 @@ import (
 	"syscall"
 	"time"
 	"wowtcp/internal/config"
+	"wowtcp/internal/repository"
 	"wowtcp/internal/tcpserver"
+	"wowtcp/pkg/challenger"
 	"wowtcp/pkg/logger"
 
 	"github.com/rs/zerolog/log"
 )
 
 const (
-	DefaultShutdownTimeout = 5 * time.Second
+	DefaultShutdownTimeout = 1 * time.Second
 )
 
 func main() {
@@ -23,9 +25,15 @@ func main() {
 		log.Fatal().Err(err).Msg("Error loading config")
 	}
 
-	log := logger.NewLogger(&cfg.Logger)
+	logger := logger.NewLogger(&cfg.Logger)
 
-	server, err := tcpserver.NewServer(cfg.Port)
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(logger.WithContext(ctx))
+
+	repo := repository.NewInMemoryRepository()
+	challenger := challenger.NewHashcashChallenger(&cfg.Challenger)
+
+	server, err := tcpserver.NewServer(cfg.Server, repo, challenger)
 	if err != nil {
 		log.Error().Err(err).Msg("Error starting TCP server")
 		return
@@ -40,16 +48,14 @@ func main() {
 		<-sigChan
 		log.Info().Msg("Shutting down server...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), DefaultShutdownTimeout)
-		defer cancel()
-
 		server.Shutdown(ctx)
+		cancel()
 
 		close(doneChan)
 	}()
 
 	log.Info().Msg("Starting TCP server")
-	server.Start()
+	server.Start(ctx)
 
 	<-doneChan
 	log.Info().Msg("Server shut down gracefully")

@@ -6,9 +6,31 @@ services:
     build:
       context: ../
       dockerfile: .build/Dockerfile
+      args:
+        - TARGET=server
     command: /app/app
-    restart: unless-stopped
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    restart: unless-stopped
     env_file:
       - ../.env
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 2s
+      test: ["CMD", "nc", "-z", "-v", "localhost", "${SERVER_PORT}"]
+
+  client:
+    container_name: client
+    build:
+      context: ../
+      dockerfile: .build/Dockerfile
+      args:
+        - TARGET=client
+    command: ["/app/app", "-host", "server", "-port", "${SERVER_PORT}"]
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    depends_on:
+      server:
+        condition: service_healthy

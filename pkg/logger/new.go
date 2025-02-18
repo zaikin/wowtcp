@@ -11,7 +11,7 @@ func NewLogger(cfg *Config) *zerolog.Logger {
 	var output io.Writer
 	output = os.Stdout
 	if cfg.Console {
-		output = zerolog.ConsoleWriter{Out: os.Stderr}
+		output = zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05", NoColor: false}
 	}
 
 	logger := zerolog.New(output).With().Timestamp().Logger()

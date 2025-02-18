@@ -1,15 +1,17 @@
 package config
 
 import (
+	"wowtcp/internal/tcpserver"
+	"wowtcp/pkg/challenger"
 	"wowtcp/pkg/logger"
 
 	"github.com/joeshaw/envdecode"
 )
 
 type Config struct {
-	Port int `env:"APP_PORT,required"`
-
-	Logger logger.Config
+	Logger     logger.Config
+	Challenger challenger.Config
+	Server     tcpserver.Config
 }
 
 func LoadConfig() (*Config, error) {

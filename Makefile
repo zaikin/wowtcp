@@ -1,5 +1,4 @@
-
-.PHONY: install-tools install-golinter linter linter-docker run stop restart logs
+.PHONY: install-tools install-golinter linter linter-docker generate run stop restart logs
 
 install-tools: install-golinter
 
@@ -12,6 +11,9 @@ linter: install-tools ### Run linter
 linter-docker:
 	docker run -t --rm -v $(shell pwd):/app -w /app golangci/golangci-lint:v1.62.2 golangci-lint run -v
 
+generate:
+	go generate ./...
+
 run:
 	docker-compose --env-file .env -f .build/docker-compose.yml up -d --build
 
@@ -22,4 +24,4 @@ restart:
 	docker-compose --env-file .env -f .build/docker-compose.yml restart
 
 logs:
-	docker-compose -f .build/docker-compose.yml logs -f
+	docker-compose --env-file .env -f .build/docker-compose.yml logs -f

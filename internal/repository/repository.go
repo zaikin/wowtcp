@@ -36,5 +36,6 @@ func NewInMemoryRepository() *InMemoryRepository {
 }
 
 func (r *InMemoryRepository) GetWoWQuote() string {
+	//nolint:gosec
 	return r.data[rand.IntN(len(r.data))]
 }

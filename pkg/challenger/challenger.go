@@ -33,7 +33,7 @@ func (c *HashcashChallenger) NewChallenge(resousceType string) Challenge {
 type EmptyChallenger struct {
 }
 
-func NewEmptyChallenger(resourceType string, difficulty int) *EmptyChallenger {
+func NewEmptyChallenger(_ string, _ int) *EmptyChallenger {
 	return &EmptyChallenger{}
 }
 

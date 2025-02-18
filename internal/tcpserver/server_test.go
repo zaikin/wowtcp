@@ -9,6 +9,7 @@ import (
 	challengerMocks "wowtcp/pkg/challenger/mocks"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockConn struct {
@@ -17,11 +18,11 @@ type mockConn struct {
 	writeBuffer *bytes.Buffer
 }
 
-func (m *mockConn) Read(b []byte) (n int, err error) {
+func (m *mockConn) Read(b []byte) (int, error) {
 	return m.readBuffer.Read(b)
 }
 
-func (m *mockConn) Write(b []byte) (n int, err error) {
+func (m *mockConn) Write(b []byte) (int, error) {
 	return m.writeBuffer.Write(b)
 }
 
@@ -49,7 +50,7 @@ func TestHandleQuote(t *testing.T) {
 	}
 
 	err := server.handleQuote(ctx, conn)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedChallenge := "challenge: version=1.0, resourceType=quote, timestamp=1234567890, difficulty=2\n"
 	expectedQuote := "quote: This is a WoW quote\n"
@@ -81,7 +82,7 @@ func TestHandleQuoteInvalidNonce(t *testing.T) {
 	}
 
 	err := server.handleQuote(ctx, conn)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expectedChallenge := "challenge: version=1.0, resourceType=quote, timestamp=1234567890, difficulty=2\n"
 	expectedError := "Invalid nonce\n"

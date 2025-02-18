@@ -43,6 +43,7 @@ func (c *HashcashChallenge) GetChallengeMessage() string {
 
 func (c *HashcashChallenge) ParseChallengeMessage(message string) error {
 	matches := challengeRegex.FindStringSubmatch(message)
+	//nolint:mnd
 	if len(matches) != 5 {
 		err := errors.New("invalid challenge message format")
 		log.Error().Err(err).Str("message", message).Msg("Error parsing challenge message")
@@ -75,7 +76,7 @@ func (c *HashcashChallenge) VerifyPoW(nonce string) bool {
 
 func (c *HashcashChallenge) SolvePoW() string {
 	for i := 0; ; i++ {
-		nonce := fmt.Sprintf("%d", i)
+		nonce := strconv.FormatInt(int64(i), 10)
 		if c.VerifyPoW(nonce) {
 			return nonce
 		}
@@ -89,11 +90,11 @@ func (c *EmptyChallenge) GetChallengeMessage() string {
 	return "challenge"
 }
 
-func (c *EmptyChallenge) ParseChallengeMessage(message string) error {
+func (c *EmptyChallenge) ParseChallengeMessage(_ string) error {
 	return nil
 }
 
-func (c *EmptyChallenge) VerifyPoW(nonce string) bool {
+func (c *EmptyChallenge) VerifyPoW(_ string) bool {
 	return true
 }
 

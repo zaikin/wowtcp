@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewHashcashChallenger(t *testing.T) {
@@ -48,7 +49,7 @@ func TestParseChallengeMessage(t *testing.T) {
 	chall := &HashcashChallenge{}
 
 	err := chall.ParseChallengeMessage(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "1.0", chall.version)
 	assert.Equal(t, "resource123", chall.resourceType)
 	assert.Equal(t, "1234567890", chall.timestamp)

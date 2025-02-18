@@ -130,14 +130,14 @@ func (s *Server) handleQuote(ctx context.Context, conn net.Conn) error {
 
 	if chall.VerifyPoW(nonce) {
 		quote := s.repository.GetWoWQuote()
-		if _, err := tcpmessage.Write(conn, fmt.Sprintf("quote: %s\n", quote)); err != nil {
-			err := errors.Wrap(err, "Error sending quote")
+		if _, err = tcpmessage.Write(conn, fmt.Sprintf("quote: %s\n", quote)); err != nil {
+			err = errors.Wrap(err, "Error sending quote")
 			return err
 		}
 		log.Info().Str("sent quote", quote).Msg("Sent quote to client")
 	} else {
 		errorMessage := "Invalid nonce"
-		if _, err := tcpmessage.Write(conn, errorMessage+"\n"); err != nil {
+		if _, err = tcpmessage.Write(conn, errorMessage+"\n"); err != nil {
 			err = errors.Wrap(err, "Error sending error message")
 			return err
 		}

@@ -80,6 +80,7 @@ func main() {
 
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", *host, *port))
 	if err != nil {
+		//nolint:gocritic
 		log.Fatal().Err(err).Msg("Error connecting to server")
 	}
 	defer conn.Close()
@@ -92,7 +93,8 @@ func main() {
 		}
 		log.Info().Msg("Sent quote request")
 
-		message, err := tcpmessage.Read(conn)
+		var message string
+		message, err = tcpmessage.Read(conn)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				log.Info().Msg("Connection closed by server")
@@ -102,6 +104,7 @@ func main() {
 			continue
 		}
 		handleMessage(ctx, conn, message)
+		//nolint:mnd
 		time.Sleep(5 * time.Second)
 	}
 }

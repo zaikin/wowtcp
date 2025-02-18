@@ -11,22 +11,22 @@ permissions:
   checks: write
 
 jobs:
-  golangci:
-    name: lint
-    runs-on: ubuntu-latest
+  lint:
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.62.2
-      - name: Test with Go
-        run: go test -json > TestResults-${{ matrix.go-version }}.json
-      - name: Upload Go test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: Go-results-${{ matrix.go-version }}
-          path: TestResults-${{ matrix.go-version }}.json
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: setup go
+      uses: actions/setup-go@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: setup go
+      uses: actions/setup-go@v2
+    - name: test
+      run: |
+        go test -v -cover ./...

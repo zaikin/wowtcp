@@ -1,4 +1,4 @@
-name: Golang linter
+name: Linter and unit tests
 on:
   push:
     branches:
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   lint:
+    name: "Lint"
     runs-on: ubuntu-20.04
     steps:
     - name: checkout

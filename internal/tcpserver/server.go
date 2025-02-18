@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 	"wowtcp/pkg/challenger"
-	tcpmessage "wowtcp/pkg/tcpMessage"
+	"wowtcp/pkg/tcpio"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
@@ -78,12 +79,13 @@ func (s *Server) Shutdown(ctx context.Context) {
 func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
 	log := zerolog.Ctx(ctx).With().Str("method", "handleConnection").Str("remoteAddr", conn.RemoteAddr().String()).Logger()
 	ctx = log.WithContext(ctx)
+	messages := tcpio.NewTCPReadWriter(conn)
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			message, err := tcpmessage.Read(conn)
+			message, err := messages.Read()
 			if err != nil {
 				log.Error().Err(err).Msg("Error reading message")
 				return
@@ -96,7 +98,7 @@ func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
 				conn.Close()
 				return
 			case "quote!":
-				if err = s.handleQuote(ctx, conn); err != nil {
+				if err = s.handleQuote(ctx, messages); err != nil {
 					log.Warn().Err(err).Msg("Error handling quote")
 					conn.Close()
 					return
@@ -108,11 +110,11 @@ func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
 	}
 }
 
-func (s *Server) handleQuote(ctx context.Context, conn net.Conn) error {
+func (s *Server) handleQuote(ctx context.Context, messages tcpio.ReadWriter) error {
 	log := zerolog.Ctx(ctx).With().Str("method", "handleQuote").Logger()
 	chall := s.challenger.NewChallenge("quote")
 
-	_, err := tcpmessage.Write(conn, chall.GetChallengeMessage()+"\n")
+	_, err := messages.Write(chall.GetChallengeMessage() + "\n")
 	if err != nil {
 		err = errors.Wrap(err, "Error sending challenge")
 		return err
@@ -120,24 +122,32 @@ func (s *Server) handleQuote(ctx context.Context, conn net.Conn) error {
 
 	log.Info().Str("sent challenge", chall.GetChallengeMessage()).Msg("Sent challenge to client")
 
-	nonce, err := tcpmessage.Read(conn)
+	nonce, err := messages.Read()
 	if err != nil {
 		err = errors.Wrap(err, "Error reading nonce response")
 		return err
 	}
 
+	if !strings.HasPrefix(nonce, "nonce: ") {
+		log.Error().Err(err).Str("nonce", nonce).Msg("Error parsing nonce response")
+		err = errors.New("invalid nonce response format")
+		return err
+	}
+
+	nonce = strings.TrimPrefix(nonce, "nonce: ")
+
 	log.Info().Str("received nonce", nonce).Msg("Received nonce response")
 
 	if chall.VerifyPoW(nonce) {
 		quote := s.repository.GetWoWQuote()
-		if _, err = tcpmessage.Write(conn, fmt.Sprintf("quote: %s\n", quote)); err != nil {
+		if _, err = messages.Write(fmt.Sprintf("quote: %s\n", quote)); err != nil {
 			err = errors.Wrap(err, "Error sending quote")
 			return err
 		}
 		log.Info().Str("sent quote", quote).Msg("Sent quote to client")
 	} else {
 		errorMessage := "Invalid nonce"
-		if _, err = tcpmessage.Write(conn, errorMessage+"\n"); err != nil {
+		if _, err = messages.Write(errorMessage + "\n"); err != nil {
 			err = errors.Wrap(err, "Error sending error message")
 			return err
 		}

@@ -1,27 +1,36 @@
-.PHONY: install-tools install-golinter linter linter-docker generate run stop restart logs
+.PHONY: install-tools install-golinter linter linter-docker test test-coverage generate run stop restart logs
+
+DOCKER_COMPOSE_CMD = docker-compose --env-file .env -f .build/docker-compose.yml
 
 install-tools: install-golinter
 
 install-golinter:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2
 
-linter: install-tools ### Run linter
+linter: install-tools
 	golangci-lint run ./...
 
 linter-docker:
 	docker run -t --rm -v $(shell pwd):/app -w /app golangci/golangci-lint:v1.62.2 golangci-lint run -v
 
+test:
+	go test -v ./...
+
+test-coverage:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=cover.out -o=cover.html
+
 generate:
 	go generate ./...
 
 run:
-	docker-compose --env-file .env -f .build/docker-compose.yml up -d --build
+	$(DOCKER_COMPOSE_CMD) up -d --build
 
 stop:
-	docker-compose --env-file .env -f .build/docker-compose.yml down
+	$(DOCKER_COMPOSE_CMD) down
 
 restart: 
-	docker-compose --env-file .env -f .build/docker-compose.yml restart
+	$(DOCKER_COMPOSE_CMD) restart
 
 logs:
-	docker-compose --env-file .env -f .build/docker-compose.yml logs -f
+	$(DOCKER_COMPOSE_CMD) logs -f

@@ -50,8 +50,6 @@ func (c *HashcashChallenge) ParseChallengeMessage(message string) error {
 		return err
 	}
 
-	log.Info().Interface("matches", matches).Msgf("Matches: %v", matches)
-
 	c.version = matches[1]
 	c.resourceType = matches[2]
 	c.timestamp = matches[3]
@@ -81,23 +79,4 @@ func (c *HashcashChallenge) SolvePoW() string {
 			return nonce
 		}
 	}
-}
-
-type EmptyChallenge struct {
-}
-
-func (c *EmptyChallenge) GetChallengeMessage() string {
-	return "challenge"
-}
-
-func (c *EmptyChallenge) ParseChallengeMessage(_ string) error {
-	return nil
-}
-
-func (c *EmptyChallenge) VerifyPoW(_ string) bool {
-	return true
-}
-
-func (c *EmptyChallenge) SolvePoW() string {
-	return "0"
 }

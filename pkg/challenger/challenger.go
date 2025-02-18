@@ -29,14 +29,3 @@ func (c *HashcashChallenger) NewChallenge(resousceType string) Challenge {
 		timestamp:    strconv.FormatInt(time.Now().Unix(), 10),
 	}
 }
-
-type EmptyChallenger struct {
-}
-
-func NewEmptyChallenger(_ string, _ int) *EmptyChallenger {
-	return &EmptyChallenger{}
-}
-
-func (c *EmptyChallenger) NewChallenge() Challenge {
-	return &EmptyChallenge{}
-}

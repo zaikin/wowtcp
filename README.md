@@ -119,3 +119,29 @@ The TCP server and client communicate using the following messages:
 ## Design Decisions
 
 Due to the simplicity of the application, a separate service layer was omitted to avoid unnecessary complexity. This design keeps the code straightforward and easy to understand while demonstrating secure TCP communication using PoW. Additionally, the TCP client is implemented in a very basic way solely to demonstrate that the algorithm works rather than serving as a fully featured client application.
+
+## External Libraries Used
+
+This project uses several external Go libraries to enhance functionality, including environment variable decoding, structured logging, error handling, and testing utilities.
+
+### Direct Dependencies:
+
+1. **[github.com/joeshaw/envdecode](https://github.com/joeshaw/envdecode)**
+   - **Purpose**: Simplifies decoding of environment variables into Go structs.
+   - **Usage**: Used to easily load configuration settings from environment variables.
+
+2. **[github.com/pkg/errors](https://github.com/pkg/errors)**
+   - **Purpose**: Enhances Go's built-in error handling by adding error wrapping.
+   - **Usage**: Provides improved error handling and debugging.
+
+3. **[github.com/rs/zerolog](https://github.com/rs/zerolog)**
+   - **Purpose**: Provides high-performance, structured logging.
+   - **Usage**: Used for efficient and structured logging of application events.
+
+4. **[github.com/stretchr/testify](https://github.com/stretchr/testify)**
+   - **Purpose**: A popular testing library that provides assertions and mock functionalities.
+   - **Usage**: Used for unit testing to simplify test assertions.
+
+5. **[github.com/vektra/mockery](https://github.com/vektra/mockery)**
+   - **Purpose**: Generates mock implementations for interfaces, useful for testing.
+   - **Usage**: Used to create mocks for dependency injection in unit tests.

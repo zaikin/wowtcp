@@ -114,6 +114,8 @@ The TCP server and client communicate using the following messages:
 - `quote: ...`: The server sends this message with a quote if the client's nonce is correct.
 - `quit!`: The client sends this message to close the connection.
 
+	Note: This message format is used for demonstration purposes only. In a production environment, it is recommended to use a serialization method (e.g., Protobuf) for more robust and efficient message exchange.
+
 ## Design Decisions
 
 Due to the simplicity of the application, a separate service layer was omitted to avoid unnecessary complexity. This design keeps the code straightforward and easy to understand while demonstrating secure TCP communication using PoW. Additionally, the TCP client is implemented in a very basic way solely to demonstrate that the algorithm works rather than serving as a fully featured client application.

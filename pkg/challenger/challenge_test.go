@@ -2,7 +2,6 @@ package challenger
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,12 +39,12 @@ func TestGetChallengeMessage(t *testing.T) {
 		t.Fatalf("expected *HashcashChallenge, got %T", chall)
 	}
 
-	expectedMessage := "challenge: version=1.0, resourceType=resource123, timestamp=" + chall.timestamp + ", difficulty=1"
+	expectedMessage := "version=1.0, resourceType=resource123, timestamp=" + chall.timestamp + ", difficulty=1"
 	assert.Equal(t, expectedMessage, chall.GetChallengeMessage())
 }
 
 func TestParseChallengeMessage(t *testing.T) {
-	message := "challenge: version=1.0, resourceType=resource123, timestamp=1234567890, difficulty=5"
+	message := "version=1.0, resourceType=resource123, timestamp=1234567890, difficulty=5"
 	chall := &HashcashChallenge{}
 
 	err := chall.ParseChallengeMessage(message)
@@ -72,10 +71,7 @@ func TestSolvePoW(t *testing.T) {
 	challenger := NewHashcashChallenger(&Config{Difficulty: difficulty})
 	chall := challenger.NewChallenge(resourceType)
 
-	start := time.Now()
 	nonce := chall.SolvePoW()
-	duration := time.Since(start)
 
 	assert.True(t, chall.VerifyPoW(nonce))
-	t.Logf("Solved PoW in %s with nonce %s", duration, nonce)
 }

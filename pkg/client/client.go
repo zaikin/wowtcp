@@ -112,6 +112,8 @@ func (c *Client) handleMessage(message string) (MessageType, string, error) {
 }
 
 func (c *Client) handleChallenge(message string) error {
+	message = strings.TrimPrefix(message, ChallengePrefix)
+
 	chall := challenger.HashcashChallenge{}
 
 	if err := chall.ParseChallengeMessage(message); err != nil {

@@ -7,6 +7,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 cover.html
+.cover.html
 
 # Go workspace file
 go.work

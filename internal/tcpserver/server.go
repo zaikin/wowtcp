@@ -18,10 +18,11 @@ const (
 )
 
 const (
-	QuoteCommand = "quote!"
-	QuitCommand  = "quit!"
-	NoncePrefix  = "nonce: "
-	QuotePrefix  = "quote: "
+	QuoteCommand    = "quote!"
+	QuitCommand     = "quit!"
+	NoncePrefix     = "nonce: "
+	QuotePrefix     = "quote: "
+	ChallengePrefix = "challenge: "
 )
 
 //go:generate mockery --name=Repository --output=./mocks --outpkg=mocks
@@ -121,7 +122,7 @@ func (s *Server) handleQuote(ctx context.Context, messages tcpio.ReadWriter) err
 	log := zerolog.Ctx(ctx).With().Str("method", "handleQuote").Logger()
 	chall := s.challenger.NewChallenge("quote")
 
-	_, err := messages.Write(chall.GetChallengeMessage())
+	_, err := messages.Write(ChallengePrefix + chall.GetChallengeMessage())
 	if err != nil {
 		err = errors.Wrap(err, "Error sending challenge")
 		return err

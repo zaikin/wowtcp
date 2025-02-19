@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	challengeRegex = regexp.MustCompile(`challenge: version=(\S+), resourceType=(\S+), timestamp=(\S+), difficulty=(\d+)`)
+	challengeRegex = regexp.MustCompile(`version=(\S+), resourceType=(\S+), timestamp=(\S+), difficulty=(\d+)`)
 )
 
 const (
-	callengeStrFormat = "challenge: version=%s, resourceType=%s, timestamp=%s, difficulty=%d"
+	callengeStrFormat = "version=%s, resourceType=%s, timestamp=%s, difficulty=%d"
 )
 
 //go:generate mockery --name=Challenge --output=./mocks --outpkg=mocks

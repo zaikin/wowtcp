@@ -85,6 +85,14 @@ func (s *Server) Shutdown(ctx context.Context) {
 }
 
 func (s *Server) handleConnection(ctx context.Context, conn net.Conn) {
+	defer func() {
+		if r := recover(); r != nil {
+			log := zerolog.Ctx(ctx).With().Str("method", "handleConnection").Logger()
+			log.Error().Interface("recover", r).Msg("Recovered from panic")
+			conn.Close()
+		}
+	}()
+
 	log := zerolog.Ctx(ctx).With().Str("method", "handleConnection").Str("remoteAddr", conn.RemoteAddr().String()).Logger()
 	ctx = log.WithContext(ctx)
 	messages := tcpio.NewTCPReadWriter(conn)
